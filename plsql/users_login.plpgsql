@@ -1,0 +1,35 @@
+CREATE OR REPLACE FUNCTION app.users_login(email text, passw text = '')
+ RETURNS app.jwt_token
+ LANGUAGE plpgsql
+ STRICT SECURITY DEFINER
+AS 
+$$
+	DECLARE
+	    registro app.usuario = NULL;
+	BEGIN
+	    select * into registro 
+	   		from app.usuario as a 
+	   		where a.email = $1;
+	
+		if registro IS NULL then
+	    	RAISE NOTICE 'usuario_email: % no encontrado', email;
+	       	return null;       
+		end if;
+	   
+	   	RAISE NOTICE 'passw = %', passw;   
+	    RAISE NOTICE 'passwh= %', registro.password_hash;
+	   
+	    if registro.password_hash = private.crypt(passw, registro.password_hash) then
+	       	RAISE NOTICE 'usuario_email: % autenticado', email;
+	       	return (registro.rol, 
+	           	    registro.id, 
+	               	extract(epoch from (now() + interval '2 days')),
+	               	registro.cliente_id,
+	               	registro.division_id)::app.jwt_token;               
+	    else
+	        RAISE NOTICE 'usuario_email: % password erroneo', email;
+	        return null;
+		end if;
+	END;
+$$
+;

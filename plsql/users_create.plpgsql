@@ -1,0 +1,20 @@
+CREATE FUNCTION users_create(nombre text, email text, password text, rol text) RETURNS bolean AS $$
+<< block >>
+DECLARE
+    creado boolean := false;
+BEGIN
+    RAISE NOTICE 'nombre: %', nombre;
+
+    --
+    -- Crear subblock
+    --
+    DECLARE
+        quantity integer := 80;
+    BEGIN
+        RAISE NOTICE 'Quantity here is %', quantity; -- Prints 80
+        RAISE NOTICE 'Outer quantity here is %', outerblock.quantity;
+    END;
+    RAISE NOTICE 'Quantity here is %', quantity;
+    RETURN creado;
+END;
+$$ LANGUAGE plpgsql;
